@@ -1,0 +1,117 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        #conatiner {
+            width: 400px;
+            height: 500px;
+            border: 1px solid #eee;
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <span>typing</span>
+    <div>
+        <span id="score">0</span>得分
+    </div>
+    <div id="conatiner">
+
+    </div>
+    <button id="start">开始游戏</button>
+</body>
+<script>
+    var gamePad = {
+        1: {
+            speed: 100
+        },
+        2: {
+            speed: 90
+        },
+        3: {
+            speed: 70
+        },
+        4: {
+            speed: 40
+        },
+        5: {
+            speed: 20
+        }
+    }
+    var getRandom = function () {
+        //随即一个97到122的字符;
+        var charCode = 97 + Math.floor(Math.random() * 26);
+        var speed = Math.ceil(Math.random() * 4);
+        return {
+            code: String.fromCharCode(charCode),
+            speed: speed,
+            y: 0,
+            x: Math.floor(Math.random() * 390),
+        }
+    };
+    function game(n, score) {
+        var eConatiner = document.getElementById("conatiner");
+        var eScore = document.getElementById("score");
+        var showArr = []; //字符对象的列表
+        var shoted = 0;
+        //随机一个字符对象， 包含了字符的运动速度，字符的值
+        //让showArr这个数组的数据运动;
+        var run = function () {
+            //随机生成字符对象
+            if (Math.random() > 0.9) {
+                var obj = getRandom();
+                showArr.push(obj);
+            }
+            //让元素运动
+            for (var i = 0; i < showArr.length; i++) {
+                showArr[i].y += showArr[i].speed;
+                if (showArr[i].y > 500) {
+                    //showArr.splice(i,1);
+                    clear();
+                    alert("游戏失败");
+                    location.reload();
+                }
+            }
+            eConatiner.innerHTML = "";
+            //让元素添加到界面中;
+            for (var i = 0; i < showArr.length; i++) {
+                var eSpan = document.createElement("span");
+                eSpan.style.position = "absolute";
+                eSpan.innerHTML = showArr[i].code;
+                eSpan.style.left = showArr[i].x;
+                eSpan.style.top = showArr[i].y;
+                eConatiner.appendChild(eSpan);
+            }
+        }
+        var keyup = function (ev) {
+            for (var i = 0; i < showArr.length; i++) {
+                if (showArr[i].code === ev.key || String.fromCharCode(ev.keyCode).toLowerCase() == showArr[i].code) {
+                    showArr.splice(i, 1);
+                    shoted++;
+                    eScore.innerHTML = shoted;
+                    if (shoted === score && gamePad[n + 1] === undefined) {
+                        alert("少侠你好厉害， 你好快， 真的好快好快的");
+                    } else if (shoted === score) {
+                        clear();
+                        alert("进入下一关");
+                        game(n + 1, score + 10)
+                    }
+                    return;
+                }
+            }
+        }
+        var clear = function () {
+            clearInterval(game.timer);
+            window.removeEventListener("keyup", keyup);
+        }
+        window.addEventListener("keyup", keyup);
+        game.timer = setInterval(run, gamePad[n].speed);
+    }
+    document.getElementById("start").addEventListener("click", function () {
+        game(1, 10);
+    });
+</script>
+
+</html>
